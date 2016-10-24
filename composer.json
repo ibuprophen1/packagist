@@ -1,0 +1,19 @@
+{
+    "name": "tapatalk/resources",
+    "description": "Tapatalk resources and data layer.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "chenchao",
+            "email": "chenchao@tapatalk.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.5.0"
+    },
+    "autoload": {
+        "psr-4": {"Tapatalk\\": "src/Tapatalk"}
+    }
+}
