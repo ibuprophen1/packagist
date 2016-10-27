@@ -12,7 +12,8 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=5.5.0",
-        "ext-redis": "2.*"
+        "ext-redis": "2.*",
+        "ssdb/phpssdb": "dev-master"
     },
     "autoload": {
         "psr-4": {"Tapatalk\\": "src/Tapatalk"}
