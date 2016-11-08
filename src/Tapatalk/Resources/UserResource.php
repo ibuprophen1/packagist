@@ -32,38 +32,6 @@ class UserResource
     // protected $redis;
 
     /**
-     * Returns the *Singleton* instance of this class.
-     *
-     * @return Singleton The *Singleton* instance.
-     */
-    public static function getInstance($connections = [])
-    {
-        if (null === static::$instance) {
-            static::$instance = new static();
-
-            $this->setPrimaryConnectionType($connections);
-
-            // if (isset($connections['ssdb'])) {
-            //     $this->ssdb = new UserSSDB($connections['ssdb']);
-            // }
-
-            // if (isset($connections['redis'])) {
-            //     $this->redis = new UserRedis($connections['redis']);
-            // }
-
-            // self::$storage = new \Redis();
-
-            // foreach ($connections as $connection) {
-            //     // $this->connections[] = 
-            // }
-            // self::$storage->connect(config('api.userdata.connection.redis'));
-            // static::$instance->connections = $connections;  // only set connections when 1st time initiate
-        }
-        
-        return static::$instance;
-    }
-
-    /**
      * Protected constructor to prevent creating a new instance of the
      * *Singleton* via the `new` operator from outside of this class.
      */
@@ -89,6 +57,42 @@ class UserResource
      */
     private function __wakeup()
     {
+    }
+
+    /**
+     * Returns the *Singleton* instance of this class.
+     *
+     * @return Singleton The *Singleton* instance.
+     */
+    public static function getInstance($connections = [])
+    {
+        if (null === static::$instance) {
+            static::$instance = new static();
+
+            $this->setPrimaryConnectionType($connections);
+
+            if (isset($connections['ssdb'])) {
+                $this->ssdb_connection = $connections['ssdb'];
+
+                UserSSDB::setConnection($connection);
+            }
+
+            if (isset($connections['redis'])) {
+                $this->redis_connection = $connections['redis'];
+
+                UserRedis::setConnection($connection);
+            }
+
+            // self::$storage = new \Redis();
+
+            // foreach ($connections as $connection) {
+            //     // $this->connections[] = 
+            // }
+            // self::$storage->connect(config('api.userdata.connection.redis'));
+            // static::$instance->connections = $connections;  // only set connections when 1st time initiate
+        }
+        
+        return static::$instance;
     }
 
     /**
@@ -120,39 +124,34 @@ class UserResource
         return $this;
     }
 
-    public function __get($properity_name)
+    public function __get($property_name)
     {
-        if ( ! method_exists($this, $properity_name)) throw new Exception("Can't get properity \"$properity_name\".");
+        if ( ! method_exists($this, $property_name)) throw new Exception("Can't get property \"$property_name\".");
 
         if ($this->ssdb_connection && $this->redis_connection) {
             if ($this->primary_connection_type == 'ssdb') {
                 try {
-                    return UserSSDB::$properity_name();
+                    return UserSSDB::$property_name();
                 } catch (Exception $e) {
-                    return UserRedis::$properity_name();
+                    return UserRedis::$property_name();
                 }            
             } else {
                 try {
-                    return UserRedis::$properity_name();
+                    return UserRedis::$property_name();
                 } catch (Exception $e) {
-                    return UserSSDB::$properity_name();
+                    return UserSSDB::$property_name();
                 }
             }         
         } elseif ($this->ssdb_connection) {
-            return UserSSDB::$properity_name();
+            return UserSSDB::$property_name();
         } elseif ($this->redis_connection) {
-            return UserRedis::$properity_name();
+            return UserRedis::$property_name();
         }
 
         #return $this->$name();
     }
 
-    public function avatar()
-    {
-        // return self::storage()->hget("$key", $fields);
 
-        return 'user avatars!!';
-    }
 
     // static public function storage()
     // {

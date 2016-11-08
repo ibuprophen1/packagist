@@ -2,9 +2,11 @@
 
 namespace Tapatalk\Resources;
 
-class UserSSDB implements CacheStorageInterface
+class UserSSDB extends AbstractUserCache
 {
     static public $storage = null;   // "user-data" redis, or ssdb
+
+    static public $connection;
 
     static public function storage()
     {
@@ -17,28 +19,23 @@ class UserSSDB implements CacheStorageInterface
         return self::$storage;
     }
 
-    /**
-     * Rewrite "hmget" to support ssdb
-     *
-     * @param   string  $key
-     * @param   array   $fields
-     * @return  array
-     */
-    public static function hmget($key, $fields = [], $value = '')
+    static public function setConnection($connection)
     {
-        return self::storage()->hmget($key, $fields);
+        self::$connection = $connection;
     }
 
-    public static function hget($key, $fields = [], $value = '')
+    /**
+     * UserSSDB::$property_name(). E.g: UserSSDB::avatar()
+     *
+     * @param   string  $name
+     * @param   array  $arguments
+     * @return  string
+     */
+    static public function __callStatic($name, $arguments)
     {
-        return self::storage()->hget($key, $fields);
+        return self::storage()->hget($name);
     }
     
-    public static function hgetall($key, $fields = [], $value = '')
-    {
-        return self::storage()->hgetall($key);
-    }
-
     /**
      * SSDB don't support "Set", therefore using hash instead
      *
@@ -53,16 +50,4 @@ class UserSSDB implements CacheStorageInterface
         return array_keys($arr);
     }
 
-    /**
-     * Hset($key, $field, $value)
-     *
-     * @param   string  $key
-     * @param   string  $field
-     * @param   string  $value
-     * @return  void
-     */
-    public static function hset($key, $field = '', $value = '')
-    {
-        return self::storage()->hset($key, $field, $value);
-    }      
 }

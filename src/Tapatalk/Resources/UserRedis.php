@@ -2,61 +2,65 @@
 
 namespace Tapatalk\Resources;
 
-class UserRedis implements CacheStorageInterface
+class UserRedis extends AbstractUserCache
 {
-    // const STORAGE = 'redis';  // optional : ssdb
-    
-    // static public $storage = null;   // "user-data" redis, or ssdb
+    static public $storage = null;   // "user-data" redis, or ssdb
 
-    // static public function storage()
-    // {
-    //     if (is_null(self::$storage)) {
-    //         self::$storage = new \Redis();
+    static public $connection;
 
-    //         self::$storage->connect(config('api.userdata.connection.redis'));
-    //     } 
+    // private static $instance;
+
+    static public function storage()
+    {
+        if (is_null(self::$storage)) {
+            self::$storage = new \Redis();
+
+            self::$storage->connect(self::$connection);
+        } 
         
-    //     return self::$storage;
-    // }
-
-    /**
-     * Rewrite "hmget" to support ssdb
-     *
-     * @param   string  $key
-     * @param   array   $fields
-     * @return  array
-     */
-    public function hmget($key, $fields = [], $value = '')
-    {
-        return self::storage()->hmget($key, $fields);
+        return self::$storage;
     }
 
-    public function hget($key, $fields = [], $value = '')
+    static public function setConnection($connection)
     {
-        return self::storage()->hget($key, $fields);
-    }
-
-
-    public function hgetall($key, $fields = [], $value = '')
-    {
-        return self::storage()->hgetall($key);
-    }
-
-    public function smembers($key, $fields = [], $value = '')
-    {
-        return self::storage()->smembers($key);
+        self::$connection = $connection;
     }
 
     /**
-     * Hset($key, $field, $value)
+     * UserSSDB::$property_name(). E.g: UserSSDB::avatar()
      *
-     * @param   string  $key
-     * @param   string  $field
-     * @param   string  $value
-     * @return  void
+     * @param   string  $name
+     * @param   array  $arguments
+     * @return  string
      */
-    public function hset($key, $field = '', $value = '')
+    static public function __callStatic($name, $arguments)
     {
-        return self::storage()->hset($key, $field, $value);
-    }    
+        return self::storage()->hget($name);
+    }
+
+
+    static public function avatar()
+    {
+        // return self::storage()->hget("$key", $fields);
+    }
+
+    /**
+     * Returns the *Singleton* instance of this class.
+     *
+     * @return Singleton The *Singleton* instance.
+     */
+    // public static function getInstance($connection)
+    // {
+    //     if (null === static::$instance) {
+    //         static::$instance = new static();
+
+    //         static::$storage = new \Redis();
+
+    //         static::$storage->connect(self::$connection);
+
+    //         // static::$instance->connections = $connections;  // only set connections when 1st time initiate
+    //     }
+        
+    //     return static::$instance;
+    // }    
 }
