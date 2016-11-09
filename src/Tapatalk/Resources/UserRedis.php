@@ -2,13 +2,11 @@
 
 namespace Tapatalk\Resources;
 
-class UserRedis extends AbstractUserCache
+class UserRedis extends UserCacheBase
 {
     static public $storage = null;   // "user-data" redis, or ssdb
 
     static public $connection;
-
-    // private static $instance;
 
     static public function storage()
     {
@@ -33,16 +31,16 @@ class UserRedis extends AbstractUserCache
      * @param   array  $arguments
      * @return  string
      */
-    static public function __callStatic($name, $arguments)
-    {
-        return self::storage()->hget($name);
-    }
+    // static public function __callStatic($name, $arguments)
+    // {
+    //     return self::storage()->hget($name);
+    // }
 
 
-    static public function avatar()
-    {
-        // return self::storage()->hget("$key", $fields);
-    }
+    // static public function avatar()
+    // {
+    //     return self::storage()->hget("$key", $fields);
+    // }
 
     /**
      * Returns the *Singleton* instance of this class.

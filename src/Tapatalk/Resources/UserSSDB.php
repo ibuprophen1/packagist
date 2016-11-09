@@ -2,7 +2,7 @@
 
 namespace Tapatalk\Resources;
 
-class UserSSDB extends AbstractUserCache
+class UserSSDB extends UserCacheBase
 {
     static public $storage = null;   // "user-data" redis, or ssdb
 
@@ -13,7 +13,7 @@ class UserSSDB extends AbstractUserCache
         if (is_null(self::$storage)) {
             self::$storage = new \Redis();
 
-            self::$storage->connect(config('api.userdata.connection.ssdb'));
+            self::$storage->connect(self::$connection);
         } 
         
         return self::$storage;
@@ -31,10 +31,10 @@ class UserSSDB extends AbstractUserCache
      * @param   array  $arguments
      * @return  string
      */
-    static public function __callStatic($name, $arguments)
-    {
-        return self::storage()->hget($name);
-    }
+    // static public function __callStatic($name, $arguments)
+    // {
+    //     return self::storage()->hget($name);
+    // }
     
     /**
      * SSDB don't support "Set", therefore using hash instead
@@ -43,7 +43,7 @@ class UserSSDB extends AbstractUserCache
      * @param   array   $fields
      * @return  array
      */
-    public static function smembers($key, $fields = [], $value = '')
+    public function smembers($key, $fields = [], $value = '')
     {
         // return self::storage()->smembers($key);
         $arr = self::storage()->hgetall($key);

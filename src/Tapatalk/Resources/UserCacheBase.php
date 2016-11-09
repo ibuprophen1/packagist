@@ -2,16 +2,11 @@
 
 namespace Tapatalk\Resources;
 
-abstract class AbstractUserCache
+/**
+ * Put non-static functions here to be inherited
+ */
+class UserCacheBase
 {
-    // const STORAGE = 'redis';  // optional : ssdb
-    
-    // static public $storage = null;   // "user-data" redis, or ssdb
-
-    abstract static public function storage()
-    {
-    }
-
     /**
      * Rewrite "hmget" to support ssdb
      *
@@ -19,23 +14,22 @@ abstract class AbstractUserCache
      * @param   array   $fields
      * @return  array
      */
-    public function hmget($key, $fields = [], $value = '')
+    public function hmget($key, $fields = [])
     {
         return self::storage()->hmget($key, $fields);
     }
 
-    public function hget($key, $fields = [], $value = '')
+    public function hget($key, $field)
     {
-        return self::storage()->hget($key, $fields);
+        return self::storage()->hget($key, $field);
     }
 
-
-    public function hgetall($key, $fields = [], $value = '')
+    public function hgetall($key)
     {
         return self::storage()->hgetall($key);
     }
 
-    public function smembers($key, $fields = [], $value = '')
+    public function smembers($key)
     {
         return self::storage()->smembers($key);
     }

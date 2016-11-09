@@ -9,7 +9,12 @@ class UserResource
      */
     private static $instance;
     
-    protected $connections = [];   // "user-data" redis, or ssdb
+    /**
+     * "user-data" redis, or ssdb
+     *
+     * @var  array
+     */
+    protected $connections = [];
 
     /**
      * By default, use ssdb connection
@@ -18,6 +23,11 @@ class UserResource
      */
     protected $primary_connection_type = 'ssdb';
 
+    /**
+     * Current request's au_id
+     *
+     * @var  int
+     */
     protected $au_id;
 
     /**
@@ -25,11 +35,7 @@ class UserResource
      *
      * @var  string
      */
-    protected $key_user_data;
-
-    // protected $ssdb;
-
-    // protected $redis;
+    protected $redis_key;
 
     /**
      * Protected constructor to prevent creating a new instance of the
@@ -69,27 +75,19 @@ class UserResource
         if (null === static::$instance) {
             static::$instance = new static();
 
-            $this->setPrimaryConnectionType($connections);
+            static::$instance->setPrimaryConnectionType($connections);
 
             if (isset($connections['ssdb'])) {
-                $this->ssdb_connection = $connections['ssdb'];
+                static::$instance->ssdb_connection = $connections['ssdb'];
 
-                UserSSDB::setConnection($connection);
+                UserSSDB::setConnection($connections['ssdb']);
             }
 
             if (isset($connections['redis'])) {
-                $this->redis_connection = $connections['redis'];
+                static::$instance->redis_connection = $connections['redis'];
 
-                UserRedis::setConnection($connection);
+                UserRedis::setConnection($connections['redis']);
             }
-
-            // self::$storage = new \Redis();
-
-            // foreach ($connections as $connection) {
-            //     // $this->connections[] = 
-            // }
-            // self::$storage->connect(config('api.userdata.connection.redis'));
-            // static::$instance->connections = $connections;  // only set connections when 1st time initiate
         }
         
         return static::$instance;
@@ -118,49 +116,81 @@ class UserResource
      */
     public function user($au_id)
     {
-        $this->au_id         = $au_id;
-        $this->key_user_data = 'APPUSER:'.$au_id;
+        $this->au_id     = $au_id;
+        $this->redis_key = 'APPUSER:'.$au_id;
 
         return $this;
     }
 
+    /**
+     * Handle single proerty request. E.g: $resource->user(100)->avatar, $property_name : avatar
+     *
+     * @param   string  $property_name
+     * @return  string
+     */
     public function __get($property_name)
     {
-        if ( ! method_exists($this, $property_name)) throw new Exception("Can't get property \"$property_name\".");
+        $result = null;
 
         if ($this->ssdb_connection && $this->redis_connection) {
             if ($this->primary_connection_type == 'ssdb') {
                 try {
-                    return UserSSDB::$property_name();
-                } catch (Exception $e) {
-                    return UserRedis::$property_name();
+                    $result = UserSSDB::storage()->hget($this->redis_key, $property_name);
+                } catch (\RedisException $e) {
+                    $result = UserRedis::storage()->hget($this->redis_key, $property_name);
                 }            
             } else {
                 try {
-                    return UserRedis::$property_name();
-                } catch (Exception $e) {
-                    return UserSSDB::$property_name();
+                    $result = UserRedis::storage()->hget($this->redis_key, $property_name);
+                } catch (\RedisException $e) {
+                    $result = UserSSDB::storage()->hget($this->redis_key, $property_name);
                 }
             }         
         } elseif ($this->ssdb_connection) {
-            return UserSSDB::$property_name();
+            $result = UserSSDB::storage()->hget($this->redis_key, $property_name);
+            // return UserSSDB::$property_name();
         } elseif ($this->redis_connection) {
-            return UserRedis::$property_name();
+            $result = UserRedis::storage()->hget($this->redis_key, $property_name);
+            // return UserRedis::$property_name();
         }
 
+        return (string) $result;
         #return $this->$name();
     }
 
+    /**
+     * Get multiple user properties. E.g: $resource->user(100)->get(['email', 'avatar']);
+     *
+     * @param   array  $property_names
+     * @return  array
+     */
+    public function get($property_names)
+    {
+        // Support getting single property using : $resource->user(100)->get('email') :
+        if (is_string($property_names)) {
+            return $this->__get($property_names);
+        }
 
-
-    // static public function storage()
-    // {
-    //     if (is_null(self::$storage)) {
-    //         self::$storage = new \Redis();
-
-    //         self::$storage->connect(config('api.userdata.connection.redis'));
-    //     } 
+        if ( ! is_array($property_names)) throw new Exception("Invalid params. Accept string or array of user properties.");
         
-    //     return self::$storage;
-    // }    
+        if ($this->ssdb_connection && $this->redis_connection) {
+            if ($this->primary_connection_type == 'ssdb') {
+                try {
+                    return UserSSDB::storage()->hmget($this->redis_key, $property_names);
+                } catch (\RedisException $e) {
+                    return UserRedis::storage()->hmget($this->redis_key, $property_names);
+                }            
+            } else {
+                try {
+                    return UserRedis::storage()->hmget($this->redis_key, $property_names);
+                } catch (\RedisException $e) {
+                    return UserSSDB::storage()->hmget($this->redis_key, $property_names);
+                }
+            }         
+        } elseif ($this->ssdb_connection) {
+            return UserSSDB::storage()->hmget($this->redis_key, $property_names);
+        } elseif ($this->redis_connection) {
+            return UserRedis::storage()->hmget($this->redis_key, $property_names);
+        }
+    } 
 }
