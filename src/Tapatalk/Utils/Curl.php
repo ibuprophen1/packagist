@@ -95,6 +95,11 @@ class Curl
          curl_setopt($s,CURLOPT_COOKIEJAR,$this->_cookieFileLocation); 
          curl_setopt($s,CURLOPT_COOKIEFILE,$this->_cookieFileLocation); 
 
+         // Chao - Https:
+         curl_setopt($s,CURLOPT_SSL_VERIFYHOST,2); 
+         curl_setopt($s,CURLOPT_SSL_VERIFYPEER,true); 
+         // curl_setopt($s,CURLOPT_CAINFO,__DIR__ . 'PATH_TO/cacert.pem'); 
+
          if($this->authentication == 1){ 
            curl_setopt($s, CURLOPT_USERPWD, $this->auth_name.':'.$this->auth_pass); 
          } 

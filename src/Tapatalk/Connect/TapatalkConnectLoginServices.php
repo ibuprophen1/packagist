@@ -96,12 +96,12 @@ class TapatalkConnectLoginServices
         $params += [
             'client_id' => $this->app->getId(),
             'state' => $state,
-            // 'response_type' => 'code',
+            'response_type' => 'code',
             // 'sdk' => 'php-sdk-' . Facebook::VERSION,
             'redirect_uri' => $redirectUrl,
             'scope' => implode(',', $scope)
         ];
-
+        
         return static::BASE_AUTHORIZATION_URL . '/oauth?' . http_build_query($params, null, $separator);
     } 
 
