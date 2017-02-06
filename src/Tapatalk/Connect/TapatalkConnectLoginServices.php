@@ -18,7 +18,8 @@ class TapatalkConnectLoginServices
     /**
      * @const string The base authorization URL.
      */
-    const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
+    #const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
+    const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
 
     /**
      * The TapatalkApp instance.
@@ -102,7 +103,7 @@ class TapatalkConnectLoginServices
             'scope' => implode(',', $scope)
         ];
         
-        return static::BASE_AUTHORIZATION_URL . '/oauth?' . http_build_query($params, null, $separator);
+        return static::BASE_AUTHORIZATION_URL . '/connect/login?' . http_build_query($params, null, $separator);
     } 
 
     /**
