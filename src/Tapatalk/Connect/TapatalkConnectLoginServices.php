@@ -216,8 +216,10 @@ class TapatalkConnectLoginServices
 
         $tapacurl->createCurl();
 
-        $api_response = $tapacurl->getResponse();
+        $api_response_json = $tapacurl->getResponse();
 
+        $api_response = json_decode($api_response_json, true);
+        
         return isset($api_response['data']['access_token']) ? $api_response['data']['access_token'] : '';
     }
 }
