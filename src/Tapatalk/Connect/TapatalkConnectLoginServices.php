@@ -21,6 +21,8 @@ class TapatalkConnectLoginServices
     #const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
     const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
 
+    const REQUEST_ACCESS_TOKEN_URL = 'https://www-chao.tapatalk.com/fake/sso/tt_connect/access_token';
+
     /**
      * The TapatalkApp instance.
      *
@@ -124,11 +126,12 @@ class TapatalkConnectLoginServices
         $this->validateCsrf();
         $this->resetCsrf();
 
-        $redirectUrl = $redirectUrl ?: $this->urlDetectionHandler->getCurrentUrl();
-        // At minimum we need to remove the state param
-        $redirectUrl = FacebookUrlManipulator::removeParamsFromUrl($redirectUrl, ['state']);
+        // $redirectUrl = $redirectUrl ?: $this->urlDetectionHandler->getCurrentUrl();
+        // // At minimum we need to remove the state param
+        // $redirectUrl = FacebookUrlManipulator::removeParamsFromUrl($redirectUrl, ['state']);
 
-        return $this->getAccessTokenFromCode($code, $redirectUrl);
+        // return $this->getAccessTokenFromCode($code, $redirectUrl);
+        return $this->getAccessTokenFromCode($code);
     }       
 
     /**
@@ -197,13 +200,14 @@ class TapatalkConnectLoginServices
         return isset($_GET[$key]) ? $_GET[$key] : null;
     }    
 
-    public function getAccessTokenFromCode($code, $redirectUrl)
+    public function getAccessTokenFromCode($code)
     {
-        $tapacurl = new Curl($itunes_url); 
+        $tapacurl = new Curl(self::REQUEST_ACCESS_TOKEN_URL); 
 
         $request = json_encode([
-            'code'        => $code,
-            'redirectUrl' => $redirectUrl,
+            'code'          => $code,
+            'client_id'     => $this->app->getId(),
+            'client_secret' => $this->app->getSecret(),
             ], JSON_UNESCAPED_SLASHES);
 
         // $request = str_replace('\\/', '/', $request);   // Apple won't accpet converting / to \\/ by json_encode
@@ -212,8 +216,8 @@ class TapatalkConnectLoginServices
 
         $tapacurl->createCurl();
 
-        $response = $tapacurl->getResponse();
+        $api_response = $tapacurl->getResponse();
 
-        return $response;    
+        return isset($api_response['data']['access_token']) ? $api_response['data']['access_token'] : '';
     }
 }
