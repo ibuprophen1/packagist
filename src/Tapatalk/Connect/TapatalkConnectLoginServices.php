@@ -19,9 +19,9 @@ class TapatalkConnectLoginServices
      * @const string The base authorization URL.
      */
     #const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
-    const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
+    #const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
+    const BASE_AUTHORIZATION_URL = 'https://stage.tapatalk.com';
 
-    #const REQUEST_ACCESS_TOKEN_URL = 'https://www-chao.tapatalk.com/fake/sso/tt_connect/access_token';
     const REQUEST_ACCESS_TOKEN_URL = 'https://sso.tapatalk.com/tt_connect/access_token';
 
     /**
