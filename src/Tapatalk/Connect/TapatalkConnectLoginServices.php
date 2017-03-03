@@ -21,6 +21,7 @@ class TapatalkConnectLoginServices
     #const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
     #const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
     const BASE_AUTHORIZATION_URL = 'https://stage.tapatalk.com';
+    private $EXTEND_AUTHORIZATION_URL = '';  // "/connect/login", "/connect/register"
 
     const REQUEST_ACCESS_TOKEN_URL = 'https://sso.tapatalk.com/tt_connect/access_token';
 
@@ -81,6 +82,15 @@ class TapatalkConnectLoginServices
      */
     public function getLoginUrl($redirectUrl, array $scope = [], $separator = '&')
     {
+        $this->EXTEND_AUTHORIZATION_URL = '/connect/login';
+
+        return $this->makeUrl($redirectUrl, $scope, [], $separator);
+    }
+
+    public function getRegisterUrl($redirectUrl, array $scope = [], $separator = '&')
+    {
+        $this->EXTEND_AUTHORIZATION_URL = '/connect/register';
+
         return $this->makeUrl($redirectUrl, $scope, [], $separator);
     }
 
@@ -106,7 +116,7 @@ class TapatalkConnectLoginServices
             'scope' => implode(',', $scope)
         ];
         
-        return static::BASE_AUTHORIZATION_URL . '/connect/login?' . http_build_query($params, null, $separator);
+        return static::BASE_AUTHORIZATION_URL . $this->EXTEND_AUTHORIZATION_URL. '?' . http_build_query($params, null, $separator);
     } 
 
     /**
