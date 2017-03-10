@@ -18,12 +18,11 @@ class TapatalkConnectLoginServices
     /**
      * @const string The base authorization URL.
      */
-    #const BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
-    #const BASE_AUTHORIZATION_URL = 'https://www-chao.tapatalk.com';
-    const BASE_AUTHORIZATION_URL = 'https://stage.tapatalk.com';
-    private $EXTEND_AUTHORIZATION_URL = '';  // "/connect/login", "/connect/register"
+    private $BASE_AUTHORIZATION_URL = 'https://www.tapatalk.com';
 
     const REQUEST_ACCESS_TOKEN_URL = 'https://sso.tapatalk.com/tt_connect/access_token';
+
+    private $EXTEND_AUTHORIZATION_URL = '';  // "/connect/login", "/connect/register"
 
     /**
      * The TapatalkApp instance.
@@ -45,6 +44,11 @@ class TapatalkConnectLoginServices
         $this->sessionUtil = $sessionUtil ?: new TapatalkPHPFileSessionUtil();
         // $this->urlDetectionHandler = $urlHandler ?: new FacebookUrlDetectionHandler();
         // $this->pseudoRandomStringGenerator = PseudoRandomStringGeneratorFactory::createPseudoRandomStringGenerator($prsg);
+        
+        // siteowners-stage.tapatalk.com's tt connect, using stage.tapatalk.com's tt login:
+        if ($this->app->getId() == '1489117253') {
+            $this->BASE_AUTHORIZATION_URL = 'https://stage.tapatalk.com';
+        }
     }
 
     /**
@@ -116,7 +120,7 @@ class TapatalkConnectLoginServices
             'scope' => implode(',', $scope)
         ];
         
-        return static::BASE_AUTHORIZATION_URL . $this->EXTEND_AUTHORIZATION_URL. '?' . http_build_query($params, null, $separator);
+        return $this->BASE_AUTHORIZATION_URL . $this->EXTEND_AUTHORIZATION_URL. '?' . http_build_query($params, null, $separator);
     } 
 
     /**
