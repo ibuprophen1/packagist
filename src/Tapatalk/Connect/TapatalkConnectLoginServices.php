@@ -141,12 +141,14 @@ class TapatalkConnectLoginServices
         $this->validateCsrf();
         $this->resetCsrf();
 
+        $source = $this->getSource();
+
         // $redirectUrl = $redirectUrl ?: $this->urlDetectionHandler->getCurrentUrl();
         // // At minimum we need to remove the state param
         // $redirectUrl = FacebookUrlManipulator::removeParamsFromUrl($redirectUrl, ['state']);
 
         // return $this->getAccessTokenFromCode($code, $redirectUrl);
-        return $this->getAccessTokenFromCode($code);
+        return $this->getAccessTokenFromCode($code, $source);
     }       
 
     /**
@@ -204,6 +206,16 @@ class TapatalkConnectLoginServices
     }
 
     /**
+     * Get source of TT connect. Options: facebook, google, email_login, email_register
+     *
+     * @return  string
+     */
+    protected function getSource()
+    {
+        return $this->getInput('source');
+    }
+
+    /**
      * Returns a value from a GET param.
      *
      * @param string $key
@@ -215,7 +227,7 @@ class TapatalkConnectLoginServices
         return isset($_GET[$key]) ? $_GET[$key] : null;
     }    
 
-    public function getAccessTokenFromCode($code)
+    public function getAccessTokenFromCode($code, $source)
     {
         $tapacurl = new Curl(self::REQUEST_ACCESS_TOKEN_URL); 
 
@@ -223,6 +235,7 @@ class TapatalkConnectLoginServices
             'code'          => $code,
             'client_id'     => $this->app->getId(),
             'client_secret' => $this->app->getSecret(),
+            'source'        => $source,
             ], JSON_UNESCAPED_SLASHES);
 
         // $request = str_replace('\\/', '/', $request);   // Apple won't accpet converting / to \\/ by json_encode
